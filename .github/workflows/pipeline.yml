@@ -1,0 +1,24 @@
+name: API Produtos CI/CD
+
+on:
+  push:
+    branches: 
+      - main
+
+jobs:
+  build:
+    name: Compilação do código
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Executar build
+      run: echo "Realizando o Build do projeto Java"
+
+  deploy:
+    name: Implantação do projeto
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+    - name: Executar deploy
+      run: echo "Realizando o deploy do projeto Java"
