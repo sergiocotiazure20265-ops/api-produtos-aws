@@ -54,9 +54,17 @@ jobs:
     - name: Preparar arquivo para deploy no Elastic Beanstalk
       run: |
         mkdir -p deploy
-        cp *.jar deploy/Procfile
+        
+        # Encontrar o JAR compilado
+        JAR_FILE=$(find target -name "*.jar" -type f | grep -v original)
+        cp "$JAR_FILE" deploy/app.jar
+        
+        # Criar Procfile para Elastic Beanstalk
+        echo "web: java -jar app.jar" > deploy/Procfile
+        
+        # Criar ZIP
         cd deploy
-        zip -r ../api-produtos-aws.zip .
+        zip -r ../api-produtos-aws.zip . -x "*.git*"
 
     - name: Deploy no Elastic Beanstalk
       run: |
