@@ -55,8 +55,14 @@ jobs:
       run: |
         mkdir -p deploy
         
-        # Encontrar o JAR compilado
-        JAR_FILE=$(find target -name "*.jar" -type f | grep -v original)
+        # Encontrar o JAR do artefato downloadado
+        JAR_FILE=$(find . -maxdepth 1 -name "*.jar" -type f)
+        if [ -z "$JAR_FILE" ]; then
+          echo "Erro: JAR não encontrado"
+          ls -la
+          exit 1
+        fi
+        
         cp "$JAR_FILE" deploy/app.jar
         
         # Criar Procfile para Elastic Beanstalk
@@ -64,7 +70,7 @@ jobs:
         
         # Criar ZIP
         cd deploy
-        zip -r ../api-produtos-aws.zip . -x "*.git*"
+        zip -r ../api-produtos-aws.zip .
 
     - name: Deploy no Elastic Beanstalk
       run: |
