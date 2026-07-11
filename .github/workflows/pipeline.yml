@@ -53,11 +53,13 @@ jobs:
 
     - name: Preparar arquivo para deploy no Elastic Beanstalk
       run: |
-        mkdir -p .ebextensions
-        cp *.jar .ebextensions/
+        mkdir -p deploy
+        cp *.jar deploy/Procfile
+        cd deploy
+        zip -r ../api-produtos-aws.zip .
 
     - name: Deploy no Elastic Beanstalk
       run: |
-        pip install awsebcli
-        eb init -p "Docker running on 64bit Amazon Linux 2" api-produtos-aws --region us-east-2 --skip-ssl
+        pip install awsebcli --quiet
+        eb init api-produtos-aws --platform java --region us-east-2 --skip-initial-commit
         eb deploy Api-produtos-aws-env
