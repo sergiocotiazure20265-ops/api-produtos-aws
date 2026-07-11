@@ -61,5 +61,26 @@ jobs:
     - name: Deploy no Elastic Beanstalk
       run: |
         pip install awsebcli --quiet
-        eb init api-produtos-aws --platform java --region us-east-2 --skip-initial-commit
+        
+        # Criar arquivo de configuração do EB
+        mkdir -p .elasticbeanstalk
+        cat > .elasticbeanstalk/config.yml <<EOF
+        branch-defaults:
+          main:
+            environment: Api-produtos-aws-env
+        environment-defaults:
+          Api-produtos-aws-env:
+            branch: null
+            repository: null
+        global:
+          application_name: api-produtos-aws
+          default_region: us-east-2
+          include_git_submodules: true
+          instance_profile: null
+          platform_name: null
+          platform_version: null
+          sc: git
+          workspace_type: Application
+        EOF
+        
         eb deploy Api-produtos-aws-env
