@@ -11,8 +11,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Executar build
-      run: echo "Realizando o Build do projeto Java"
+    - name: Checkout do código
+      uses: actions/checkout@v3
+
+    - name: Configurar Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: '25'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Build do projeto com Maven
+      run: mvn clean package -DskipTests
+
+    - name: Upload do artefato
+      uses: actions/upload-artifact@v3
+      with:
+        name: api-produtos-aws
+        path: target/*.jar
 
   deploy:
     name: Implantação do projeto
@@ -20,5 +36,37 @@ jobs:
     needs: build
 
     steps:
-    - name: Executar deploy
-      run: echo "Realizando o deploy do projeto Java"
+    - name: Checkout do código
+      uses: actions/checkout@v3
+
+    - name: Download do artefato
+      uses: actions/download-artifact@v3
+      with:
+        name: api-produtos-aws
+
+    - name: Configurar credenciais AWS
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-2
+
+    - name: Preparar arquivo para deploy no Elastic Beanstalk
+      run: |
+        mkdir -p deploy
+        cp *.jar deploy/
+        cd deploy
+        zip -r ../api-produtos-aws.zip .
+
+    - name: Deploy no Elastic Beanstalk
+      run: |
+        aws elasticbeanstalk create-app-version \
+          --application-name api-produtos-aws \
+          --version-label ${{ github.sha }} \
+          --source-bundle S3Bucket=$EB_BUCKET,S3Key=api-produtos-aws.zip \
+          --region us-east-2 || true
+        
+        aws elasticbeanstalk update-environment \
+          --environment-name Api-produtos-aws-env \
+          --version-label ${{ github.sha }} \
+          --region us-east-2
