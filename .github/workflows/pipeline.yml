@@ -58,12 +58,16 @@ jobs:
         cd deploy
         zip -r ../api-produtos-aws.zip .
 
+    - name: Upload do ZIP para S3
+      run: |
+        aws s3 cp api-produtos-aws.zip s3://elasticbeanstalk-us-east-2-${{ secrets.AWS_ACCOUNT_ID }}/api-produtos-aws-${{ github.sha }}.zip
+
     - name: Deploy no Elastic Beanstalk
       run: |
-        aws elasticbeanstalk create-app-version \
+        aws elasticbeanstalk create-application-version \
           --application-name api-produtos-aws \
           --version-label ${{ github.sha }} \
-          --source-bundle S3Bucket=$EB_BUCKET,S3Key=api-produtos-aws.zip \
+          --source-bundle S3Bucket=elasticbeanstalk-us-east-2-${{ secrets.AWS_ACCOUNT_ID }},S3Key=api-produtos-aws-${{ github.sha }}.zip \
           --region us-east-2 || true
         
         aws elasticbeanstalk update-environment \
