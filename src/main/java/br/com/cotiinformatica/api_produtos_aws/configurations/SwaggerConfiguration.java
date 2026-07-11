@@ -15,7 +15,7 @@ public class SwaggerConfiguration {
     public OpenAPI apiAssinaturasOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("API Produtos")
+                        .title("API Produtos - CI/CD AWS Elastic Beanstalk")
                         .description("API REST para gerenciamento de produtos.")
                         .version("v1.0.0")
                         .contact(new Contact()
